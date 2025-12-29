@@ -57,20 +57,32 @@ def consultar_cedula(ci):
 
         cedula = obtener_campo("Cédula:")
         nombre = obtener_campo("Nombres completos:")
-        fecha = obtener_campo("Fecha de nacimiento:")
+        fecha_larga = obtener_campo("Fecha de nacimiento:")
+
+        try:
+            fecha_corta = driver.find_element(
+                By.XPATH,
+                "//div[@class='result-field'][.//label[normalize-space()='Fecha de nacimiento:']]//small"
+            ).text.strip().replace("(", "").replace(")", "")
+        except NoSuchElementException:
+            fecha_corta = ""
+
+        try:
+            edad = obtener_campo("Edad actual:")
+        except:
+            edad = ""
 
         if not cedula:
-            return None, None, None
+            return None, None, None, None, None
 
-        return cedula, nombre, fecha
+        return cedula, nombre, fecha_larga, fecha_corta, edad
 
     except TimeoutException:
-        return None, None, None
+        return None, None, None, None, None
     except Exception:
-        return None, None, None
+        return None, None, None, None, None
     finally:
         driver.quit()
-
 
 if __name__ == "__main__":
     while True:
@@ -83,9 +95,13 @@ if __name__ == "__main__":
             print("Cédula incorrecta (10 dígitos numéricos).")
             continue
 
-        c, n, f = consultar_cedula(cedula)
+        c, n, f_texto, f_iso, edad = consultar_cedula(cedula)
 
         if c:
-            print(f"{c} | {n} | {f}")
+            print(f"Cédula: {c}")
+            print(f"Nombres: {n}")
+            print(f"Fecha Larga: {f_texto}")
+            print(f"Fecha Corta: {f_iso}")
+            print(f"Edad: {edad}")
         else:
             print("No se encontró información.")
